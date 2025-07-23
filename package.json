@@ -1,13 +1,19 @@
 {
   "name": "@zero-intl/react",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Zero Intl Library for i18n",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "types": "dist/index.d.mts",
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    }
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
