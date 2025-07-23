@@ -2,15 +2,41 @@
   "name": "zero-intl",
   "version": "0.0.1",
   "description": "Zero Intl Library for i18n",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
+    "globalization",
     "i18n",
     "internationalization",
-    "formatjs"
+    "intl",
+    "locale",
+    "localization",
+    "react",
+    "reactjs",
+    "translate",
+    "translation"
   ],
   "author": "Sebastian Podsiadło",
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
 }
