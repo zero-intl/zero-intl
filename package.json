@@ -1,5 +1,5 @@
 {
-  "name": "@zero-intl/react-intl",
+  "name": "@zero-intl/react",
   "version": "0.0.3",
   "description": "Zero Intl Library for i18n",
   "main": "dist/index.js",
