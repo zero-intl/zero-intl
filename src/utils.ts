@@ -7,109 +7,234 @@ export function formatICUMessage(
   values: Record<string, any> = {},
   locale: string
 ): string {
-  // Handle plural formatting: {count, plural, =0 {no items} one {# item} other {# items}}
-  message = message.replace(
-    /\{(\w+),\s*plural,\s*(.+?)\}/g,
-    (match, key, rules) => {
-      const value = values[key];
-      if (value === undefined) return match;
+  let result = message;
+  let hasChanged = true;
 
-      const pluralRules = new Intl.PluralRules(locale);
-      const rule = pluralRules.select(Number(value));
-
-      // Parse rules like "=0 {no items} one {# item} other {# items}"
-      const rulePattern = /(?:(=\d+|zero|one|two|few|many|other)\s*\{([^}]*)\})/g;
-      let ruleMatch;
-      let result = '';
-
-      // First check for exact matches (=0, =1, etc.)
-      const exactPattern = new RegExp(`=?${value}\\s*\\{([^}]*)\\}`, 'i');
-      const exactMatch = rules.match(exactPattern);
-      if (exactMatch) {
-        result = exactMatch[1];
-      } else {
-        // Check for plural rule matches
-        while ((ruleMatch = rulePattern.exec(rules)) !== null) {
-          const [, ruleName, ruleText] = ruleMatch;
-          if (ruleName === rule || (ruleName === 'other' && !result)) {
-            result = ruleText;
-            if (ruleName === rule) break;
-          }
-        }
-      }
-
-      // Replace # with the actual number
-      return result.replace(/#/g, String(value));
+  // Keep processing until no more ICU patterns are found (handle nested ICU)
+  while (hasChanged) {
+    hasChanged = false;
+    const newResult = processICUPatterns(result, values, locale);
+    if (newResult !== result) {
+      result = newResult;
+      hasChanged = true;
     }
-  );
-
-  // Handle select formatting: {gender, select, male {he} female {she} other {they}}
-  message = message.replace(
-    /\{(\w+),\s*select,\s*(.+?)\}/g,
-    (match, key, rules) => {
-      const value = values[key];
-      if (value === undefined) return match;
-
-      // Parse select rules
-      const rulePattern = /(\w+)\s*\{([^}]*)\}/g;
-      let ruleMatch;
-      let result = '';
-
-      while ((ruleMatch = rulePattern.exec(rules)) !== null) {
-        const [, option, text] = ruleMatch;
-        if (option === String(value) || (option === 'other' && !result)) {
-          result = text;
-          if (option === String(value)) break;
-        }
-      }
-
-      return result;
-    }
-  );
-
-  // Handle selectordinal formatting: {rank, selectordinal, one {#st} two {#nd} few {#rd} other {#th}}
-  message = message.replace(
-    /\{(\w+),\s*selectordinal,\s*(.+?)\}/g,
-    (match, key, rules) => {
-      const value = values[key];
-      if (value === undefined) return match;
-
-      const ordinalRules = new Intl.PluralRules(locale, { type: 'ordinal' });
-      const rule = ordinalRules.select(Number(value));
-
-      // Parse ordinal rules
-      const rulePattern = /(?:(=\d+|zero|one|two|few|many|other)\s*\{([^}]*)\})/g;
-      let ruleMatch;
-      let result = '';
-
-      // First check for exact matches
-      const exactPattern = new RegExp(`=?${value}\\s*\\{([^}]*)\\}`, 'i');
-      const exactMatch = rules.match(exactPattern);
-      if (exactMatch) {
-        result = exactMatch[1];
-      } else {
-        // Check for ordinal rule matches
-        while ((ruleMatch = rulePattern.exec(rules)) !== null) {
-          const [, ruleName, ruleText] = ruleMatch;
-          if (ruleName === rule || (ruleName === 'other' && !result)) {
-            result = ruleText;
-            if (ruleName === rule) break;
-          }
-        }
-      }
-
-      // Replace # with the actual number
-      return result.replace(/#/g, String(value));
-    }
-  );
+  }
 
   // Handle simple variable interpolation: {name}
-  message = message.replace(/\{(\w+)\}/g, (match, key) => {
+  result = result.replace(/\{(\w+)\}/g, (match, key) => {
     const value = values[key];
     return value !== undefined ? String(value) : match;
   });
 
-  return message;
+  return result;
+}
+
+function processICUPatterns(message: string, values: Record<string, any>, locale: string): string {
+  let result = '';
+  let i = 0;
+
+  while (i < message.length) {
+    if (message[i] === '{') {
+      // Try to parse an ICU pattern starting here
+      const icuResult = parseICUAtPosition(message, i, values, locale);
+      if (icuResult.success) {
+        result += icuResult.replacement;
+        i = icuResult.endIndex + 1;
+      } else {
+        result += message[i];
+        i++;
+      }
+    } else {
+      result += message[i];
+      i++;
+    }
+  }
+
+  return result;
+}
+
+function parseICUAtPosition(
+  message: string,
+  startIndex: number,
+  values: Record<string, any>,
+  locale: string
+): { success: boolean; replacement: string; endIndex: number } {
+  let i = startIndex + 1; // Skip opening brace
+
+  // Read variable name
+  let varName = '';
+  while (i < message.length && /\w/.test(message[i])) {
+    varName += message[i];
+    i++;
+  }
+
+  // Skip whitespace
+  while (i < message.length && /\s/.test(message[i])) i++;
+
+  // Check for comma (ICU format)
+  if (i >= message.length || message[i] !== ',') {
+    return { success: false, replacement: '', endIndex: startIndex };
+  }
+  i++; // Skip comma
+
+  // Skip whitespace
+  while (i < message.length && /\s/.test(message[i])) i++;
+
+  // Read ICU type (plural, select, selectordinal)
+  let icuType = '';
+  while (i < message.length && /\w/.test(message[i])) {
+    icuType += message[i];
+    i++;
+  }
+
+  if (!['plural', 'select', 'selectordinal'].includes(icuType)) {
+    return { success: false, replacement: '', endIndex: startIndex };
+  }
+
+  // Skip whitespace and comma
+  while (i < message.length && /\s,/.test(message[i])) i++;
+
+  // Parse rules until closing brace
+  const { rules, endIndex } = parseICURulesAtPosition(message, i);
+  if (endIndex === -1) {
+    return { success: false, replacement: '', endIndex: startIndex };
+  }
+
+  // Process the ICU pattern
+  const value = values[varName];
+  if (value === undefined) {
+    return { success: false, replacement: '', endIndex: startIndex };
+  }
+
+  let replacement = '';
+  switch (icuType) {
+    case 'plural':
+      replacement = formatPlural(Number(value), rules, locale);
+      break;
+    case 'select':
+      replacement = formatSelect(String(value), rules);
+      break;
+    case 'selectordinal':
+      replacement = formatSelectOrdinal(Number(value), rules, locale);
+      break;
+  }
+
+  return { success: true, replacement, endIndex };
+}
+
+function parseICURulesAtPosition(message: string, startIndex: number): { rules: Record<string, string>; endIndex: number } {
+  const rules: Record<string, string> = {};
+  let i = startIndex;
+
+  while (i < message.length) {
+    // Skip whitespace
+    while (i < message.length && /\s/.test(message[i])) i++;
+
+    if (i >= message.length) break;
+
+    // If we hit a closing brace, we're done
+    if (message[i] === '}') {
+      return { rules, endIndex: i };
+    }
+
+    // Read rule name
+    let ruleName = '';
+    while (i < message.length && message[i] !== '{' && !/\s/.test(message[i]) && message[i] !== '}') {
+      ruleName += message[i];
+      i++;
+    }
+
+    // Skip whitespace
+    while (i < message.length && /\s/.test(message[i])) i++;
+
+    // Expect opening brace for rule content
+    if (i >= message.length || message[i] !== '{') {
+      if (message[i] === '}') {
+        return { rules, endIndex: i };
+      }
+      continue;
+    }
+    i++; // Skip opening brace
+
+    // Read rule content with proper brace matching
+    let ruleContent = '';
+    let braceDepth = 1;
+    while (i < message.length && braceDepth > 0) {
+      if (message[i] === '{') {
+        braceDepth++;
+        ruleContent += message[i];
+      } else if (message[i] === '}') {
+        braceDepth--;
+        if (braceDepth > 0) {
+          ruleContent += message[i];
+        }
+      } else {
+        ruleContent += message[i];
+      }
+      i++;
+    }
+
+    if (ruleName) {
+      rules[ruleName] = ruleContent;
+    }
+  }
+
+  return { rules, endIndex: -1 };
+}
+
+function formatPlural(value: number, rules: Record<string, string>, locale: string): string {
+  // Check for exact matches first (=0, =1, etc.)
+  const exactKey = `=${value}`;
+  if (rules[exactKey]) {
+    return rules[exactKey].replace(/#/g, String(value));
+  }
+
+  // Use Intl.PluralRules for locale-aware pluralization
+  const pluralRules = new Intl.PluralRules(locale);
+  const rule = pluralRules.select(value);
+
+  if (rules[rule]) {
+    return rules[rule].replace(/#/g, String(value));
+  }
+
+  // Fallback to 'other'
+  if (rules.other) {
+    return rules.other.replace(/#/g, String(value));
+  }
+
+  return String(value);
+}
+
+function formatSelect(value: string, rules: Record<string, string>): string {
+  if (rules[value]) {
+    return rules[value];
+  }
+
+  // Fallback to 'other'
+  return rules.other || String(value);
+}
+
+function formatSelectOrdinal(value: number, rules: Record<string, string>, locale: string): string {
+  // Check for exact matches first (=1, =2, etc.)
+  const exactKey = `=${value}`;
+  if (rules[exactKey]) {
+    return rules[exactKey].replace(/#/g, String(value));
+  }
+
+  // Use Intl.PluralRules with ordinal type
+  const ordinalRules = new Intl.PluralRules(locale, { type: 'ordinal' });
+  const rule = ordinalRules.select(value);
+
+  if (rules[rule]) {
+    return rules[rule].replace(/#/g, String(value));
+  }
+
+  // Fallback to 'other'
+  if (rules.other) {
+    return rules.other.replace(/#/g, String(value));
+  }
+
+  return String(value);
 }
 
 // Legacy function for backward compatibility
