@@ -1,0 +1,50 @@
+{
+  "name": "@zero-intl/cli",
+  "version": "0.0.1",
+  "description": "CLI for extracting translation keys from zero-intl components",
+  "type": "module",
+  "bin": {
+    "zero-intl": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "keywords": [
+    "i18n",
+    "intl",
+    "internationalization",
+    "cli",
+    "extract",
+    "zero-intl"
+  ],
+  "author": "Zero Intl Team",
+  "license": "MIT",
+  "dependencies": {
+    "@typescript-eslint/parser": "^6.21.0",
+    "commander": "^11.1.0",
+    "glob": "^10.3.10",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "tsup": "^8.0.1",
+    "vitest": "^1.2.2"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.0.0"
+  }
+}

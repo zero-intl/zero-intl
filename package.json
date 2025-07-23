@@ -1,55 +1,46 @@
 {
-  "name": "@zero-intl/react",
-  "version": "0.0.7",
-  "description": "Zero Intl Library for i18n",
-  "main": "dist/index.mjs",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.mts",
-  "files": [
-    "dist"
+  "name": "zero-intl",
+  "version": "0.0.1",
+  "description": "A lightweight, customizable internationalization library for React",
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.mts"
-    }
-  },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "test": "vitest",
-    "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage"
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "test:ci": "npm run test:run --workspaces",
+    "lint": "eslint packages/*/src/**/*.{ts,tsx}",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules",
+    "dev": "npm run dev --workspaces --if-present"
   },
   "keywords": [
-    "globalization",
     "i18n",
-    "internationalization",
     "intl",
-    "locale",
-    "localization",
+    "internationalization",
     "react",
-    "reactjs",
-    "translate",
-    "translation"
+    "typescript",
+    "zero-intl",
+    "cli",
+    "tree-shaking"
   ],
-  "author": "Sebastian Podsiadło",
+  "author": "Zero Intl Team",
   "license": "MIT",
-  "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zero-intl/zero-intl.git"
   },
+  "bugs": {
+    "url": "https://github.com/zero-intl/zero-intl/issues"
+  },
+  "homepage": "https://github.com/zero-intl/zero-intl#readme",
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.0",
-    "@testing-library/react": "^14.2.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@vitejs/plugin-react": "^4.7.0",
-    "jsdom": "^24.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "tsup": "^8.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^3.2.4"
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "typescript": "^5.3.3"
   }
 }
