@@ -1,0 +1,16 @@
+{
+  "name": "zero-intl",
+  "version": "0.0.1",
+  "description": "Zero Intl Library for i18n",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "formatjs"
+  ],
+  "author": "Sebastian Podsiadło",
+  "license": "MIT"
+}
