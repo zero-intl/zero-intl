@@ -1,0 +1,45 @@
+{
+  "name": "@zero-intl/core",
+  "version": "0.0.1",
+  "description": "Core internationalization utilities for zero-intl",
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:run": "vitest run"
+  },
+  "keywords": [
+    "i18n",
+    "intl",
+    "internationalization",
+    "core",
+    "utilities",
+    "formatjs",
+    "icu"
+  ],
+  "author": "Sebastian Podsiadło",
+  "license": "MIT",
+  "dependencies": {
+    "intl-messageformat": "^10.5.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2"
+  }
+}

@@ -3,10 +3,13 @@ import { useIntl, useTranslations } from "./context";
 import { TProps } from "./types";
 
 export function T({ id, defaultMessage, values }: TProps) {
-  const intl = useIntl();
   const t = useTranslations();
+  const intl = useIntl();
 
-  const formattedMessage = t(id, values, defaultMessage);
+  // Use the new t function signature
+  const formattedMessage = defaultMessage || values
+    ? t(id, { defaultMessage, ...values })
+    : t(id);
 
   if (intl.onRender) {
     const translationRecord = {

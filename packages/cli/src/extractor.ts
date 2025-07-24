@@ -1,12 +1,9 @@
-import * as ts from "typescript";
+import ts from "typescript";
 import { readFileSync } from "fs";
 import { ExtractedMessage } from "./types.js";
 
 export class MessageExtractor {
   private componentNames = new Set(["T"]);
-
-  constructor() {
-  }
 
   extractFromFile(filePath: string): ExtractedMessage[] {
     const content = readFileSync(filePath, "utf-8");

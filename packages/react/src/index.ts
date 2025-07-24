@@ -1,4 +1,3 @@
-// Legacy exports for backward compatibility
 export { ZeroIntlProvider, useIntl, useTranslations } from './context';
 export { T } from './T';
 

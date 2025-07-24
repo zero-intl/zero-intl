@@ -13,7 +13,14 @@ export interface RichTextMessageDescriptor {
 
 // Enhanced translation function interface
 export interface TranslationFunction {
-  (id: string, values?: Record<string, any>, defaultMessage?: string): string;
+  (id: string): string;
+  (id: string, options: { defaultMessage?: string } & Record<string, any>): string;
+  format: (id: string, defaultMessage?: string, components?: RichTextComponents, values?: Record<string, any>) => ReactNode;
+}
+
+export interface NamespacedTranslationFunction {
+  (id: string): string;
+  (id: string, options: { defaultMessage?: string } & Record<string, any>): string;
   format: (id: string, defaultMessage?: string, components?: RichTextComponents, values?: Record<string, any>) => ReactNode;
 }
 
@@ -42,6 +49,7 @@ export interface IntlShape {
   messages: Record<string, string>;
   formatMessage: (descriptor: MessageDescriptor) => string;
   onRender?: (record: TranslationRecord) => ReactNode;
+  defaultRichComponents?: RichTextComponents;
 }
 
 export interface ZeroIntlProviderProps {
@@ -51,6 +59,7 @@ export interface ZeroIntlProviderProps {
   defaultMessages?: Record<string, string>;
   onError?: (error: string) => void;
   onRender?: (record: TranslationRecord) => ReactNode;
+  defaultRichComponents?: RichTextComponents;
   children: ReactNode;
 }
 
@@ -58,5 +67,4 @@ export interface TProps {
   id: string;
   defaultMessage?: string;
   values?: Record<string, any>;
-  children?: (formattedMessage: string) => ReactNode;
 }

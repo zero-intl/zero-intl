@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { ZeroIntlProvider, useTranslations } from '../index';
+import { ZeroIntlProvider, useTranslations } from '../src';
 
 const messages = {
   'simple': 'Hello world',

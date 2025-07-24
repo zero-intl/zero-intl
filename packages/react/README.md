@@ -40,24 +40,24 @@ npm install @zero-intl/react
 Create your translation files. You can organize them however you prefer:
 
 ```tsx
-// messages/en.ts
-export const en = {
+// messages/en.json
+{
   'app.title': 'My Awesome App',
   'user.greeting': 'Hello, {name}!',
   'items.count': '{count, plural, =0 {no items} one {# item} other {# items}}',
   'user.profile': '{gender, select, male {Mr. {name}} female {Ms. {name}} other {{name}}}',
-};
+}
 
-// messages/es.ts
-export const es = {
+// messages/es.json
+{
   'app.title': 'Mi Aplicación Increíble',
   'user.greeting': '¡Hola, {name}!',
   'items.count': '{count, plural, =0 {ningún elemento} one {# elemento} other {# elementos}}',
   // Note: 'user.profile' is missing - will fallback to English
-};
+}
 ```
 
-### 2. Setup the Provider
+### 2. Set up the Provider
 
 Wrap your app with `ZeroIntlProvider` at the root level:
 
@@ -65,13 +65,8 @@ Wrap your app with `ZeroIntlProvider` at the root level:
 // App.tsx
 import React from 'react';
 import { ZeroIntlProvider } from 'zero-intl';
-import { en } from './messages/en';
-import { es } from './messages/es';
-
-const messages = {
-  en,
-  es,
-};
+import en from './messages/en';
+import es from './messages/es';
 
 function App() {
   const [locale, setLocale] = React.useState('en');
@@ -79,9 +74,9 @@ function App() {
   return (
     <ZeroIntlProvider 
       locale={locale}
-      messages={messages[locale]}
+      messages={enMessages}
       defaultLocale="en"
-      defaultMessages={messages.en}
+      defaultMessages={enMessages}
       onError={(error) => {
         console.warn('Translation missing:', error);
       }}
