@@ -1,22 +1,21 @@
-import * as ts from 'typescript';
-import { readFileSync } from 'fs';
-import { ExtractedMessage } from './types.js';
+import * as ts from "typescript";
+import { readFileSync } from "fs";
+import { ExtractedMessage } from "./types.js";
 
 export class MessageExtractor {
-  private componentNames = new Set(['T']);
+  private componentNames = new Set(["T"]);
 
-  constructor(additionalComponentNames: string[] = []) {
-    additionalComponentNames.forEach(name => this.componentNames.add(name));
+  constructor() {
   }
 
   extractFromFile(filePath: string): ExtractedMessage[] {
-    const content = readFileSync(filePath, 'utf-8');
+    const content = readFileSync(filePath, "utf-8");
     const sourceFile = ts.createSourceFile(
       filePath,
       content,
       ts.ScriptTarget.Latest,
       true,
-      filePath.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+      filePath.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
     );
 
     const messages: ExtractedMessage[] = [];
@@ -25,7 +24,7 @@ export class MessageExtractor {
       if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
         const tagName = this.getTagName(node);
         if (tagName && this.componentNames.has(tagName)) {
-          const message = this.extractMessageFromJsxElement(node, filePath, sourceFile);
+          const message = this.extractMessageFromNode(node, filePath);
           if (message) {
             messages.push(message);
           }
@@ -49,10 +48,9 @@ export class MessageExtractor {
     return null;
   }
 
-  private extractMessageFromJsxElement(
+  private extractMessageFromNode(
     node: ts.JsxElement | ts.JsxSelfClosingElement,
-    filePath: string,
-    sourceFile: ts.SourceFile
+    filePath: string
   ): ExtractedMessage | null {
     const attributes = ts.isJsxElement(node)
       ? node.openingElement.attributes
@@ -68,13 +66,13 @@ export class MessageExtractor {
         const value = this.getAttributeValue(prop);
 
         switch (propName) {
-          case 'id':
+          case "id":
             id = value;
             break;
-          case 'defaultMessage':
+          case "defaultMessage":
             defaultMessage = value;
             break;
-          case 'description':
+          case "description":
             description = value;
             break;
         }
@@ -85,22 +83,11 @@ export class MessageExtractor {
       return null;
     }
 
-    const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-    const end = sourceFile.getLineAndCharacterOfPosition(node.getEnd());
-
     return {
       id,
-      defaultMessage,
-      description,
-      file: filePath,
-      start: {
-        line: start.line + 1,
-        column: start.character + 1
-      },
-      end: {
-        line: end.line + 1,
-        column: end.character + 1
-      }
+      ...(defaultMessage && { defaultMessage }),
+      ...(description && { description }),
+      file: filePath
     };
   }
 
@@ -118,8 +105,7 @@ export class MessageExtractor {
         return attribute.initializer.expression.text;
       }
 
-      if (ts.isTemplateExpression(attribute.initializer.expression) ||
-          ts.isNoSubstitutionTemplateLiteral(attribute.initializer.expression)) {
+      if (ts.isTemplateExpression(attribute.initializer.expression) || ts.isNoSubstitutionTemplateLiteral(attribute.initializer.expression)) {
         // For template literals, we'll extract the raw text
         return attribute.initializer.expression.getText();
       }

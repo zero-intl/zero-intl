@@ -1,5 +1,8 @@
-export { ZeroIntlProvider, useIntl } from './context';
+// Legacy exports for backward compatibility
+export { ZeroIntlProvider, useIntl, useTranslations } from './context';
 export { T } from './T';
+
+// Type exports
 export type {
   Message,
   MessageDescriptor,
@@ -7,5 +10,12 @@ export type {
   IntlShape,
   ZeroIntlProviderProps,
   TProps,
+  // Rich Text types
+  RichTextComponents,
+  RichTextMessageDescriptor,
+  TranslationFunction,
 } from './types';
+
+// Utility functions
 export { formatMessage, interpolateMessage, createIntl, formatICUMessage } from './utils';
+export { formatRichTextMessage } from './richTextFormatter';

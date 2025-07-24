@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatICUMessage, interpolateMessage, formatMessage } from '../utils'
+import { formatICUMessage, interpolateMessage, formatMessage } from '../src/utils'
 
 describe('formatICUMessage', () => {
   describe('simple variable interpolation', () => {

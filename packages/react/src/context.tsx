@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
-import { IntlShape, ZeroIntlProviderProps } from './types';
+import { IntlShape, ZeroIntlProviderProps, TranslationFunction } from './types';
 import { createIntl } from './utils';
+import { formatRichTextMessage } from './richTextFormatter';
 
 const IntlContext = createContext<IntlShape | null>(null);
 
@@ -30,4 +31,24 @@ export function useIntl(): IntlShape {
   }
 
   return context;
+}
+
+export function useTranslations(): TranslationFunction {
+  const intl = useIntl();
+
+  const t = function(id: string, values?: Record<string, any>, defaultMessage?: string): string {
+    return intl.formatMessage({
+      id,
+      defaultMessage,
+      values
+    });
+  } as TranslationFunction;
+
+  // Add format method for Rich Text
+  t.format = function(id: string, defaultMessage?: string, components?: Record<string, (chunks: React.ReactNode) => React.ReactNode>, values?: Record<string, any>) {
+    const message = intl.messages[id] || defaultMessage || id;
+    return formatRichTextMessage(message, intl.locale, values, components);
+  };
+
+  return t;
 }

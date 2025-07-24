@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
-import { FileScanner } from '../scanner.js';
+import { FileScanner } from '../src/scanner';
 
 describe('FileScanner', () => {
   const testDir = join(process.cwd(), 'test-fixtures-scanner');

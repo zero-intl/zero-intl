@@ -1,17 +1,13 @@
 import React from "react";
-import { useIntl } from "./context";
+import { useIntl, useTranslations } from "./context";
 import { TProps } from "./types";
 
-export function T({ id, defaultMessage, values, children }: TProps) {
+export function T({ id, defaultMessage, values }: TProps) {
   const intl = useIntl();
+  const t = useTranslations();
 
-  const formattedMessage = intl.formatMessage({
-    id,
-    defaultMessage,
-    values
-  });
+  const formattedMessage = t(id, values, defaultMessage);
 
-  // If onRender is provided, use it to render the translation
   if (intl.onRender) {
     const translationRecord = {
       translationKey: id,
@@ -20,11 +16,6 @@ export function T({ id, defaultMessage, values, children }: TProps) {
       values
     };
     return <>{intl.onRender(translationRecord)}</>;
-  }
-
-  // If children render prop is provided, use it
-  if (children && typeof children === 'function') {
-    return <>{children(formattedMessage)}</>;
   }
 
   return <>{formattedMessage}</>;

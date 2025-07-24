@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
-import { ZeroIntlProvider, useIntl } from '../context'
-import { T } from '../T'
+import { ZeroIntlProvider, useIntl } from '../src/context'
+import { T } from '../src/T'
 
 // Test component that uses useIntl hook
 function TestComponent() {

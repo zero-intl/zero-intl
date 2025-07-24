@@ -1,5 +1,22 @@
 import { ReactNode } from 'react';
 
+// Rich Text formatting types
+export type RichTextComponents = Record<string, (chunks: ReactNode) => ReactNode>;
+
+export interface RichTextMessageDescriptor {
+  id: string;
+  defaultMessage?: string;
+  description?: string;
+  values?: Record<string, any>;
+  components?: RichTextComponents;
+}
+
+// Enhanced translation function interface
+export interface TranslationFunction {
+  (id: string, values?: Record<string, any>, defaultMessage?: string): string;
+  format: (id: string, defaultMessage?: string, components?: RichTextComponents, values?: Record<string, any>) => ReactNode;
+}
+
 export interface Message {
   id: string;
   defaultMessage?: string;

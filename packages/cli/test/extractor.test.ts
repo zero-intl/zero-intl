@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { writeFileSync, unlinkSync, mkdirSync, rmSync } from 'fs';
+import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
-import { MessageExtractor } from '../extractor.js';
+import { MessageExtractor } from '../src/extractor.js';
 
 describe('MessageExtractor', () => {
   const testDir = join(process.cwd(), 'test-fixtures');
@@ -37,8 +37,7 @@ function Component() {
     expect(messages[0]).toMatchObject({
       id: 'hello.world',
       defaultMessage: 'Hello World!',
-      file: testFile,
-      start: { line: 8, column: 7 },
+      file: testFile
     });
   });
 
@@ -106,27 +105,9 @@ function Component() {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({
       id: 'simple.key',
-      defaultMessage: undefined,
       file: testFile
     });
-  });
-
-  it('should extract from custom component names', () => {
-    const testFile = join(testDir, 'custom-component.tsx');
-    const content = `
-import { Translation } from './custom';
-
-function Component() {
-  return <Translation id="custom.message" defaultMessage="Custom component" />;
-}
-`;
-    writeFileSync(testFile, content);
-
-    const extractor = new MessageExtractor(['Translation']);
-    const messages = extractor.extractFromFile(testFile);
-
-    expect(messages).toHaveLength(1);
-    expect(messages[0].id).toBe('custom.message');
+    expect(messages[0]).not.toHaveProperty('defaultMessage');
   });
 
   it('should handle JSX expressions with string literals', () => {
@@ -146,7 +127,8 @@ function Component() {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({
       id: 'dynamic.key',
-      defaultMessage: 'Dynamic message'
+      defaultMessage: 'Dynamic message',
+      file: testFile
     });
   });
 
