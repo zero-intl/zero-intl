@@ -4,7 +4,7 @@ A modern, lightweight React internationalization library inspired by FormatJS, b
 
 ## Why Zero Intl?
 
-**FormatJS Inspired, Modern Browser Optimized** - While FormatJS supports legacy browsers with polyfills and compatibility layers, Zero Intl takes a different approach. By targeting modern browsers (ES2018+), we eliminate the need for heavy polyfills and achieve a significantly smaller bundle size while maintaining familiar FormatJS-style APIs.
+**FormatJS Inspired, Modern Browser Optimized** - While FormatJS supports legacy browsers with polyfills and compatibility layers, Zero Intl takes a different approach. By targeting modern browsers (ES2022+), we eliminate the need for heavy polyfills and achieve a significantly smaller bundle size while maintaining familiar FormatJS-style APIs.
 
 **Key Differentiators:**
 - 📦 **Ultra Lightweight** - 10x smaller than FormatJS by using native browser APIs
@@ -213,21 +213,6 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 >
   <App />
 </ZeroIntlProvider>
-```
-
-### TypeScript Configuration
-
-For optimal TypeScript support, ensure your `tsconfig.json` includes:
-
-```json
-{
-  "compilerOptions": {
-    "lib": ["DOM", "ES2018", "ES2020"],
-    "jsx": "react-jsx",
-    "moduleResolution": "node",
-    "esModuleInterop": true
-  }
-}
 ```
 
 ### Message Organization Patterns

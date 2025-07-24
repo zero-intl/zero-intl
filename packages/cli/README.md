@@ -14,9 +14,7 @@ Or use with npx:
 npx @zero-intl/cli extract "src/**/*.{ts,tsx}"
 ```
 
-## Commands
-
-### Extract
+## Usage
 
 Extract translation keys from source files:
 
@@ -24,128 +22,78 @@ Extract translation keys from source files:
 zero-intl extract "src/**/*.{ts,tsx}" [options]
 ```
 
-#### Options:
+### Options:
 
-- `-o, --out-file <file>`: Output file path
-- `-f, --format <format>`: Output format (`json`, `csv`, `simple-json`) - default: `json`
-- `--remove-default-message`: Remove defaultMessage from output
-- `--additional-components <components>`: Additional component names to extract (comma-separated)
-- `--no-source-location`: Exclude source location information
+- `-o, --output <file>`: Output file path (default: `source-translations.json`)
 
-#### Examples:
+### Examples:
 
 ```bash
-# Extract to console (JSON format)
+# Extract to default file (source-translations.json)
 zero-intl extract "src/**/*.{ts,tsx}"
 
-# Extract to file
-zero-intl extract "src/**/*.{ts,tsx}" -o messages.json
-
-# Extract as CSV
-zero-intl extract "src/**/*.{ts,tsx}" -f csv -o messages.csv
-
-# Extract as simple key-value JSON
-zero-intl extract "src/**/*.{ts,tsx}" -f simple-json -o messages.json
-
-# Extract from custom components
-zero-intl extract "src/**/*.{ts,tsx}" --additional-components "Translation,Translate"
-
-# Remove default messages from output
-zero-intl extract "src/**/*.{ts,tsx}" --remove-default-message
+# Extract to custom file
+zero-intl extract "src/**/*.{ts,tsx}" --output my-translations.json
+zero-intl extract "src/**/*.{ts,tsx}" -o my-translations.json
 ```
 
-### Validate
+## Output Format
 
-Validate translation keys in source files:
-
-```bash
-zero-intl validate "src/**/*.{ts,tsx}" [options]
-```
-
-This command checks for:
-- Duplicate translation IDs
-- Missing default messages
-
-#### Options:
-
-- `--additional-components <components>`: Additional component names to validate (comma-separated)
-
-#### Example:
-
-```bash
-zero-intl validate "src/**/*.{ts,tsx}"
-```
-
-## Output Formats
-
-### JSON (default)
+The CLI outputs JSON in a clean key-value format:
 
 ```json
 {
-  "messages": [
-    {
-      "id": "hello.world",
-      "defaultMessage": "Hello World!",
-      "description": "A greeting message",
-      "file": "/src/components/Hello.tsx",
-      "start": { "line": 10, "column": 5 },
-      "end": { "line": 10, "column": 45 }
-    }
-  ],
-  "meta": {
-    "totalFiles": 1,
-    "totalMessages": 1,
-    "extractedAt": "2025-07-24T00:15:13.000Z"
+  "apiKeys.authCodeName": {
+    "defaultMessage": "Auth Code",
+    "file": "pages/console/api-keys.tsx"
+  },
+  "welcome.title": {
+    "defaultMessage": "Welcome to Zero Intl!",
+    "file": "src/components/Welcome.tsx",
+    "description": "Main welcome title"
   }
-}
-```
-
-### CSV
-
-```csv
-id,defaultMessage,description,file,line,column
-hello.world,Hello World!,A greeting message,/src/components/Hello.tsx,10,5
-```
-
-### Simple JSON
-
-```json
-{
-  "hello.world": "Hello World!",
-  "goodbye.world": "Goodbye World!"
 }
 ```
 
 ## Supported Components
 
-By default, the CLI extracts from `<T/>` components. You can specify additional component names using the `--additional-components` option.
+The CLI extracts translation keys from `<T/>` components with the following props:
 
-## Integration with Build Tools
+- `id` (required): The translation key
+- `defaultMessage` (optional): Default message text
+- `description` (optional): Description for translators
 
-### npm scripts
+Example component usage:
 
-Add to your `package.json`:
+```tsx
+import { T } from '@zero-intl/react';
 
-```json
-{
-  "scripts": {
-    "extract-messages": "zero-intl extract 'src/**/*.{ts,tsx}' -o src/messages.json",
-    "validate-messages": "zero-intl validate 'src/**/*.{ts,tsx}'"
-  }
+function MyComponent() {
+  return (
+    <div>
+      <T id="welcome.message" defaultMessage="Welcome!" />
+      <T 
+        id="user.greeting" 
+        defaultMessage="Hello, {name}!" 
+        description="Greeting for logged-in users"
+      />
+    </div>
+  );
 }
 ```
 
-### CI/CD
+## Integration with Build Tools
 
-Add validation to your CI pipeline:
+Add extraction to your CI pipeline:
 
 ```yaml
-- name: Validate translation keys
-  run: npx @zero-intl/cli validate "src/**/*.{ts,tsx}"
+- name: Extract translation keys
+  run: npx @zero-intl/cli extract "src/**/*.{ts,tsx}" --output translations.json
 ```
 
-## Limitations
+## Features
 
-- Variable references in JSX attributes are not resolved (e.g., `<T id={messageId} />`)
-- Complex expressions are not evaluated
-- Template literals are extracted as raw text
+- **Fast extraction**: Processes TypeScript and TSX files efficiently
+- **Clean output**: Simple JSON format without metadata clutter
+- **Default output**: Automatically saves to `source-translations.json`
+- **Error handling**: Graceful handling of malformed files
