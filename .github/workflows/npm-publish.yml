@@ -15,10 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
       - run: npm ci
-      - run: npm test
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run test:ci
 
-  publish-npm:
+  publish-react:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -27,8 +31,38 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
+          cache: 'npm'
       - run: npm ci
-      - run: npm run build
-      - run: npm publish --access public
+      - run: npm run build:react
+      - run: npm publish --workspace @zero-intl/react --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+  publish-cli:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:cli
+      - run: npm publish --workspace @zero-intl/cli --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+  publish-summary:
+    needs: [publish-react, publish-cli]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release summary
+        run: |
+          echo "✅ Successfully published zero-intl packages:"
+          echo "📦 @zero-intl/react - React components and hooks"
+          echo "🛠️ @zero-intl/cli - CLI for extracting translation keys"
+          echo ""
+          echo "📋 Release: ${{ github.event.release.tag_name }}"
+          echo "🔗 Release URL: ${{ github.event.release.html_url }}"
