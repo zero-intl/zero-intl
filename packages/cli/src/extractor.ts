@@ -82,6 +82,10 @@ export class MessageExtractor {
           case "description":
             description = value;
             break;
+          // Note: We ignore 'values' prop as it contains JSX expressions that are not extractable as strings
+          case "values":
+            // Skip values prop - it contains runtime JSX/component expressions
+            break;
         }
       }
     });

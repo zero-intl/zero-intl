@@ -1,9 +1,8 @@
 import React, { ReactNode } from "react";
 import { RichTextComponents } from "./types";
-import { formatRichTextMessage as coreFormatRichTextMessage } from "@zero-intl/core";
 
 /**
- * Formats a message with Rich Text components using FormatJS
+ * Formats a message with Rich Text components using custom parser
  */
 export function formatRichTextMessage(
   message: string,
@@ -11,9 +10,7 @@ export function formatRichTextMessage(
   values?: Record<string, any>,
   components?: RichTextComponents
 ): ReactNode {
-  if (!components || Object.keys(components).length === 0) {
-    return coreFormatRichTextMessage(message, locale, values) as string;
-  }
+  // Always use custom parser for rich text formatting
   const parts = parseMessageToParts(message);
   return formatParts(parts, values, components);
 }
@@ -93,7 +90,16 @@ function formatParts(
         return part.content;
 
       case "variable":
-        return values?.[part.content] ?? `{${part.content}}`;
+        const value = values?.[part.content];
+        if (value !== undefined) {
+          // If the value is a React element, return it directly
+          if (React.isValidElement(value)) {
+            return React.cloneElement(value, { key: index });
+          }
+          // Otherwise convert to string
+          return String(value);
+        }
+        return `{${part.content}}`;
 
       case "component":
         if (part.tagName && components?.[part.tagName]) {

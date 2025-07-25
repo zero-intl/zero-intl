@@ -412,4 +412,256 @@ function Component() {
 
     expect(messages).toHaveLength(0);
   });
+
+  // New tests for T components with values prop containing JSX expressions
+  it('should extract T component with values prop containing JSX function components', () => {
+    const testFile = join(testDir, 't-with-jsx-values.tsx');
+    const content = `
+import React from 'react';
+import { T } from '@zero-intl/react';
+
+function Component() {
+  return (
+    <T id="poweredByXYZ" defaultMessage="Powered by <a>XYZ</a>" values={{
+      a: (chunk: React.ReactNode) => (
+        <a href="https://example.com" target="_blank" rel="noreferrer noopener nofollow"
+           className="text-muted text-link--on-hover">
+          {chunk}
+        </a>
+      )
+    }} />
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'poweredByXYZ',
+      defaultMessage: 'Powered by <a>XYZ</a>',
+      file: testFile
+    });
+    // Should not extract the values prop content as it contains JSX expressions
+    expect(messages[0]).not.toHaveProperty('values');
+  });
+
+  it('should extract T component with values prop containing JSX elements', () => {
+    const testFile = join(testDir, 't-with-jsx-element-values.tsx');
+    const content = `
+import React from 'react';
+import { T } from '@zero-intl/react';
+
+function Component() {
+  return (
+    <T id="poweredByXYZ" defaultMessage="Powered by {link}" values={{
+      link: <a href="https://example.com" target="_blank" rel="noreferrer noopener nofollow"
+            className="text-muted text-link--on-hover">
+        XYZ
+      </a>
+    }} />
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'poweredByXYZ',
+      defaultMessage: 'Powered by {link}',
+      file: testFile
+    });
+    // Should not extract the values prop content as it contains JSX expressions
+    expect(messages[0]).not.toHaveProperty('values');
+  });
+
+  it('should extract T component with complex values prop containing multiple JSX expressions', () => {
+    const testFile = join(testDir, 't-with-complex-jsx-values.tsx');
+    const content = `
+import React from 'react';
+import { T } from '@zero-intl/react';
+
+function Component() {
+  return (
+    <T id="complex.message" defaultMessage="Visit <link1>our website</link1> or <link2>contact us</link2>" values={{
+      link1: (chunk: React.ReactNode) => (
+        <a href="https://example.com" className="primary-link">
+          {chunk}
+        </a>
+      ),
+      link2: (chunk: React.ReactNode) => (
+        <a href="mailto:contact@example.com" className="contact-link">
+          {chunk}
+        </a>
+      )
+    }} />
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'complex.message',
+      defaultMessage: 'Visit <link1>our website</link1> or <link2>contact us</link2>',
+      file: testFile
+    });
+  });
+
+  it('should extract T component with mixed values prop containing both simple values and JSX', () => {
+    const testFile = join(testDir, 't-with-mixed-values.tsx');
+    const content = `
+import React from 'react';
+import { T } from '@zero-intl/react';
+
+function Component() {
+  const userName = 'John';
+  
+  return (
+    <T id="welcome.message" defaultMessage="Welcome {name}, visit <link>our help center</link>" values={{
+      name: userName,
+      count: 42,
+      link: (chunk: React.ReactNode) => (
+        <a href="/help" className="help-link">
+          {chunk}
+        </a>
+      )
+    }} />
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'welcome.message',
+      defaultMessage: 'Welcome {name}, visit <link>our help center</link>',
+      file: testFile
+    });
+  });
+
+  it('should extract T component with description and JSX values', () => {
+    const testFile = join(testDir, 't-with-description-and-jsx.tsx');
+    const content = `
+import React from 'react';
+import { T } from '@zero-intl/react';
+
+function Component() {
+  return (
+    <T 
+      id="footer.powered.by" 
+      defaultMessage="Powered by <brand>XYZ</brand>" 
+      description="Footer text with link to XYZ website"
+      values={{
+        brand: (chunk: React.ReactNode) => (
+          <a href="https://example.com" target="_blank" rel="noopener noreferrer">
+            {chunk}
+          </a>
+        )
+      }} 
+    />
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'footer.powered.by',
+      defaultMessage: 'Powered by <brand>XYZ</brand>',
+      description: 'Footer text with link to XYZ website',
+      file: testFile
+    });
+  });
+
+  it('should extract multiple T components with JSX values from the same file', () => {
+    const testFile = join(testDir, 'multiple-t-with-jsx.tsx');
+    const content = `
+import React from 'react';
+import { T } from '@zero-intl/react';
+
+function Component() {
+  return (
+    <div>
+      <T id="header.title" defaultMessage="Welcome to <brand>ZeroIntl</brand>" values={{
+        brand: (chunk: React.ReactNode) => <strong>{chunk}</strong>
+      }} />
+      
+      <T id="footer.copyright" defaultMessage="© 2023 <company>Example Corp</company>" values={{
+        company: (chunk: React.ReactNode) => <em>{chunk}</em>
+      }} />
+      
+      <T id="simple.message" defaultMessage="Simple message without values" />
+    </div>
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(3);
+    expect(messages[0]).toMatchObject({
+      id: 'header.title',
+      defaultMessage: 'Welcome to <brand>ZeroIntl</brand>',
+      file: testFile
+    });
+    expect(messages[1]).toMatchObject({
+      id: 'footer.copyright',
+      defaultMessage: '© 2023 <company>Example Corp</company>',
+      file: testFile
+    });
+    expect(messages[2]).toMatchObject({
+      id: 'simple.message',
+      defaultMessage: 'Simple message without values',
+      file: testFile
+    });
+  });
+
+  it('should extract T component with inline JSX values', () => {
+    const testFile = join(testDir, 't-with-inline-jsx.tsx');
+    const content = `
+import React from 'react';
+import { T } from '@zero-intl/react';
+
+function Component() {
+  return (
+    <T 
+      id="terms.agreement" 
+      defaultMessage="I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>" 
+      values={{
+        terms: (chunk: React.ReactNode) => <a href="/terms">{chunk}</a>,
+        privacy: (chunk: React.ReactNode) => <a href="/privacy">{chunk}</a>
+      }} 
+    />
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'terms.agreement',
+      defaultMessage: 'I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>',
+      file: testFile
+    });
+  });
 });

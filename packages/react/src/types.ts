@@ -67,4 +67,5 @@ export interface TProps {
   id: string;
   defaultMessage?: string;
   values?: Record<string, any>;
+  children?: (message: ReactNode) => ReactNode;
 }

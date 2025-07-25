@@ -301,3 +301,239 @@ describe('T Component', () => {
   //   expect(screen.getByText('Alice likes these posts for the 3rd time')).toBeInTheDocument()
   // })
 })
+
+describe('T component with React components in values', () => {
+  it('should render T component with function components in values prop', () => {
+    const messages = {
+      'poweredBySimpleLocalize': 'Powered by <a>SimpleLocalize.io</a>'
+    };
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="poweredBySimpleLocalize"
+          defaultMessage="Powered by <a>SimpleLocalize.io</a>"
+          values={{
+            a: (chunk: React.ReactNode) => (
+              <a
+                href="https://simplelocalize.io"
+                target="_blank"
+                rel="noreferrer noopener nofollow"
+                className="text-muted text-link--on-hover"
+              >
+                {chunk}
+              </a>
+            )
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    const linkElement = screen.getByRole('link', { name: 'SimpleLocalize.io' });
+    expect(linkElement).toBeInTheDocument();
+    expect(linkElement).toHaveAttribute('href', 'https://simplelocalize.io');
+    expect(linkElement).toHaveAttribute('target', '_blank');
+    expect(linkElement).toHaveAttribute('rel', 'noreferrer noopener nofollow');
+    expect(linkElement).toHaveClass('text-muted', 'text-link--on-hover');
+    expect(screen.getByText('Powered by')).toBeInTheDocument();
+  });
+
+  it('should render T component with JSX elements in values prop', () => {
+    const messages = {
+      'poweredBySimpleLocalize': 'Powered by {link}'
+    };
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="poweredBySimpleLocalize"
+          defaultMessage="Powered by {link}"
+          values={{
+            link: (
+              <a
+                href="https://simplelocalize.io"
+                target="_blank"
+                rel="noreferrer noopener nofollow"
+                className="text-muted text-link--on-hover"
+              >
+                SimpleLocalize.io
+              </a>
+            )
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    const linkElement = screen.getByRole('link', { name: 'SimpleLocalize.io' });
+    expect(linkElement).toBeInTheDocument();
+    expect(linkElement).toHaveAttribute('href', 'https://simplelocalize.io');
+    expect(linkElement).toHaveAttribute('target', '_blank');
+    expect(linkElement).toHaveAttribute('rel', 'noreferrer noopener nofollow');
+    expect(linkElement).toHaveClass('text-muted', 'text-link--on-hover');
+    expect(screen.getByText(/Powered by/)).toBeInTheDocument();
+  });
+
+  it('should render T component with mixed values (components and primitives)', () => {
+    const messages = {
+      'welcomeMessage': 'Welcome {name}, visit <link>our website</link> for {count} resources'
+    };
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="welcomeMessage"
+          defaultMessage="Welcome {name}, visit <link>our website</link> for {count} resources"
+          values={{
+            name: 'John',
+            count: 42,
+            link: (chunk: React.ReactNode) => (
+              <a href="https://example.com" className="primary-link">
+                {chunk}
+              </a>
+            )
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    expect(screen.getByText(/Welcome/)).toBeInTheDocument();
+    expect(screen.getByText(/John/)).toBeInTheDocument();
+    expect(screen.getByText(/visit/)).toBeInTheDocument();
+    expect(screen.getByText(/for/)).toBeInTheDocument();
+    expect(screen.getByText(/42/)).toBeInTheDocument();
+    expect(screen.getByText(/resources/)).toBeInTheDocument();
+
+    const linkElement = screen.getByRole('link', { name: 'our website' });
+    expect(linkElement).toBeInTheDocument();
+    expect(linkElement).toHaveAttribute('href', 'https://example.com');
+    expect(linkElement).toHaveClass('primary-link');
+  });
+
+  it('should render T component with multiple React components', () => {
+    const messages = {
+      'termsMessage': 'I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>'
+    };
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="termsMessage"
+          defaultMessage="I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>"
+          values={{
+            terms: (chunk: React.ReactNode) => (
+              <a href="/terms" className="terms-link">
+                {chunk}
+              </a>
+            ),
+            privacy: (chunk: React.ReactNode) => (
+              <a href="/privacy" className="privacy-link">
+                {chunk}
+              </a>
+            )
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    expect(screen.getByText(/I agree to the/)).toBeInTheDocument();
+    expect(screen.getByText(/and/)).toBeInTheDocument();
+
+    const termsLink = screen.getByRole('link', { name: 'Terms of Service' });
+    expect(termsLink).toBeInTheDocument();
+    expect(termsLink).toHaveAttribute('href', '/terms');
+    expect(termsLink).toHaveClass('terms-link');
+
+    const privacyLink = screen.getByRole('link', { name: 'Privacy Policy' });
+    expect(privacyLink).toBeInTheDocument();
+    expect(privacyLink).toHaveAttribute('href', '/privacy');
+    expect(privacyLink).toHaveClass('privacy-link');
+  });
+
+  it('should fallback to regular formatting when no React components are present', () => {
+    const messages = {
+      'simpleMessage': 'Hello {name}, you have {count} messages'
+    };
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="simpleMessage"
+          defaultMessage="Hello {name}, you have {count} messages"
+          values={{
+            name: 'Alice',
+            count: 5
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    expect(screen.getByText('Hello Alice, you have 5 messages')).toBeInTheDocument();
+  });
+
+  it('should handle nested components properly', () => {
+    const messages = {
+      'nestedMessage': 'Click <button>here <icon>→</icon></button> to continue'
+    };
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="nestedMessage"
+          defaultMessage="Click <button>here <icon>→</icon></button> to continue"
+          values={{
+            button: (chunk: React.ReactNode) => (
+              <button className="cta-button" type="button">
+                {chunk}
+              </button>
+            ),
+            icon: (chunk: React.ReactNode) => (
+              <span className="icon" aria-hidden="true">
+                {chunk}
+              </span>
+            )
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    expect(screen.getByText(/Click/)).toBeInTheDocument();
+    expect(screen.getByText(/to continue/)).toBeInTheDocument();
+
+    const buttonElement = screen.getByRole('button');
+    expect(buttonElement).toBeInTheDocument();
+    expect(buttonElement).toHaveClass('cta-button');
+
+    const iconElement = screen.getByText('→');
+    expect(iconElement).toBeInTheDocument();
+    expect(iconElement).toHaveClass('icon');
+    expect(iconElement).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('should use defaultMessage when message is not found in messages object', () => {
+    const messages = {}; // Empty messages
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="missingKey"
+          defaultMessage="Default <link>message</link> here"
+          values={{
+            link: (chunk: React.ReactNode) => (
+              <a href="/default" className="default-link">
+                {chunk}
+              </a>
+            )
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    expect(screen.getByText(/Default/)).toBeInTheDocument();
+    expect(screen.getByText(/here/)).toBeInTheDocument();
+
+    const linkElement = screen.getByRole('link', { name: 'message' });
+    expect(linkElement).toBeInTheDocument();
+    expect(linkElement).toHaveAttribute('href', '/default');
+    expect(linkElement).toHaveClass('default-link');
+  });
+});

@@ -1,32 +1,48 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { ZeroIntlProvider, useTranslations, T } from '../src';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { ZeroIntlProvider, useTranslations } from '../src/context';
+import { T } from '../src/T';
 
-const messages = {
-  'hello': 'Hello',
-  'greeting': 'Hello, {name}!',
-  'items': '{count, plural, =0 {No items} =1 {One item} other {# items}}'
-};
-
-function TestComponent() {
+function TestTranslationsComponent() {
   const t = useTranslations();
 
   return (
     <div>
-      <span data-testid="simple">{t('hello')}</span>
-      <span data-testid="with-values">{t('greeting', { name: 'John' })}</span>
-      <span data-testid="with-default">{t('missing.key', {}, 'Default message')}</span>
-      <span data-testid="plural">{t('items', { count: 0 })}</span>
+      <div data-testid="simple">{t('simple')}</div>
+      <div data-testid="with-values">{t('hello', { name: 'John' })}</div>
+      <div data-testid="with-default">{t('missing.key', { defaultMessage: 'Default message' })}</div>
+      <div data-testid="plural">{t('items', { count: 0 })}</div>
+    </div>
+  );
+}
+
+function TestWithTComponent() {
+  const t = useTranslations();
+
+  return (
+    <div>
+      <div data-testid="t-simple">
+        <T id="simple" />
+      </div>
+      <div data-testid="t-values">
+        <T id="hello" values={{ name: 'Alice' }} />
+      </div>
     </div>
   );
 }
 
 describe('useTranslations', () => {
+  const messages = {
+    'simple': 'Hello',
+    'hello': 'Hello, {name}!',
+    'items': '{count, plural, one {# item} other {# items} =0 {No items}}'
+  };
+
   it('should return a t function that formats messages', () => {
     render(
       <ZeroIntlProvider locale="en" messages={messages}>
-        <TestComponent />
+        <TestTranslationsComponent />
       </ZeroIntlProvider>
     );
 
@@ -39,10 +55,7 @@ describe('useTranslations', () => {
   it('should work with T component using useTranslations internally', () => {
     render(
       <ZeroIntlProvider locale="en" messages={messages}>
-        <div>
-          <T id="hello" data-testid="t-simple" />
-          <T id="greeting" values={{ name: 'Alice' }} data-testid="t-values" />
-        </div>
+        <TestWithTComponent />
       </ZeroIntlProvider>
     );
 
