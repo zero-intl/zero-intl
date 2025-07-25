@@ -18,6 +18,7 @@ export class MessageExtractor {
     const messages: ExtractedMessage[] = [];
 
     const visit = (node: ts.Node) => {
+      // Extract from T JSX components
       if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
         const tagName = this.getTagName(node);
         if (tagName && this.componentNames.has(tagName)) {
@@ -27,6 +28,15 @@ export class MessageExtractor {
           }
         }
       }
+
+      // Extract from t() function calls
+      if (ts.isCallExpression(node)) {
+        const message = this.extractMessageFromTFunction(node, filePath);
+        if (message) {
+          messages.push(message);
+        }
+      }
+
       ts.forEachChild(node, visit);
     };
 
@@ -117,5 +127,72 @@ export class MessageExtractor {
     }
 
     return undefined;
+  }
+
+  private extractMessageFromTFunction(
+    node: ts.CallExpression,
+    filePath: string
+  ): ExtractedMessage | null {
+    // Check if this is a t() function call
+    if (!this.isTFunctionCall(node)) {
+      return null;
+    }
+
+    const args = node.arguments;
+    if (args.length === 0) {
+      return null;
+    }
+
+    // First argument should be the id (string literal)
+    const firstArg = args[0];
+    if (!ts.isStringLiteral(firstArg)) {
+      return null;
+    }
+
+    const id = firstArg.text;
+    let defaultMessage: string | undefined;
+    let description: string | undefined;
+
+    // Second argument might be options object
+    if (args.length > 1 && ts.isObjectLiteralExpression(args[1])) {
+      const optionsObject = args[1];
+
+      for (const property of optionsObject.properties) {
+        if (ts.isPropertyAssignment(property) && ts.isIdentifier(property.name)) {
+          const propertyName = property.name.text;
+
+          if (propertyName === 'defaultMessage' && ts.isStringLiteral(property.initializer)) {
+            defaultMessage = property.initializer.text;
+          } else if (propertyName === 'description' && ts.isStringLiteral(property.initializer)) {
+            description = property.initializer.text;
+          }
+        }
+      }
+    }
+
+    return {
+      id,
+      ...(defaultMessage && { defaultMessage }),
+      ...(description && { description }),
+      file: filePath
+    };
+  }
+
+  private isTFunctionCall(node: ts.CallExpression): boolean {
+    const expression = node.expression;
+
+    // Direct t() function call: t('key')
+    if (ts.isIdentifier(expression) && expression.text === 't') {
+      return true;
+    }
+
+    // Property access: hook.t('key') or translations.t('key')
+    if (ts.isPropertyAccessExpression(expression) &&
+        ts.isIdentifier(expression.name) &&
+        expression.name.text === 't') {
+      return true;
+    }
+
+    return false;
   }
 }

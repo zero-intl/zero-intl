@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
-import IntlMessageFormat from 'intl-messageformat';
-import { RichTextComponents } from './types';
+import React, { ReactNode } from "react";
+import { RichTextComponents } from "./types";
+import { formatRichTextMessage as coreFormatRichTextMessage } from "@zero-intl/core";
 
 /**
  * Formats a message with Rich Text components using FormatJS
@@ -12,19 +12,14 @@ export function formatRichTextMessage(
   components?: RichTextComponents
 ): ReactNode {
   if (!components || Object.keys(components).length === 0) {
-    // Fallback to regular string formatting if no components
-    const formatter = new IntlMessageFormat(message, locale);
-    return formatter.format(values) as string;
+    return coreFormatRichTextMessage(message, locale, values) as string;
   }
-
-  // Parse message into parts using a simple XML-like parser
   const parts = parseMessageToParts(message);
-
   return formatParts(parts, values, components);
 }
 
 interface MessagePart {
-  type: 'text' | 'component' | 'variable';
+  type: "text" | "component" | "variable";
   content: string;
   tagName?: string;
   children?: MessagePart[];
@@ -47,14 +42,14 @@ function parseMessageToParts(message: string): MessagePart[] {
     if (match.index > currentIndex) {
       const textContent = message.slice(currentIndex, match.index);
       if (textContent) {
-        parts.push({ type: 'text', content: textContent });
+        parts.push({ type: "text", content: textContent });
       }
     }
 
     if (match[3]) {
       // ICU variable like {count}
       parts.push({
-        type: 'variable',
+        type: "variable",
         content: match[3]
       });
     } else {
@@ -63,7 +58,7 @@ function parseMessageToParts(message: string): MessagePart[] {
       const innerContent = match[2];
 
       parts.push({
-        type: 'component',
+        type: "component",
         content: innerContent,
         tagName,
         children: parseMessageToParts(innerContent)
@@ -77,7 +72,7 @@ function parseMessageToParts(message: string): MessagePart[] {
   if (currentIndex < message.length) {
     const textContent = message.slice(currentIndex);
     if (textContent) {
-      parts.push({ type: 'text', content: textContent });
+      parts.push({ type: "text", content: textContent });
     }
   }
 
@@ -94,13 +89,13 @@ function formatParts(
 ): ReactNode {
   return parts.map((part, index) => {
     switch (part.type) {
-      case 'text':
+      case "text":
         return part.content;
 
-      case 'variable':
+      case "variable":
         return values?.[part.content] ?? `{${part.content}}`;
 
-      case 'component':
+      case "component":
         if (part.tagName && components?.[part.tagName]) {
           const Component = components[part.tagName];
           const children = part.children

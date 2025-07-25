@@ -1,6 +1,6 @@
 {
   "name": "@zero-intl/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Core internationalization utilities for zero-intl",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",

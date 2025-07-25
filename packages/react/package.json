@@ -1,6 +1,6 @@
 {
   "name": "@zero-intl/react",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Zero Intl Library for i18n",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
@@ -20,7 +20,8 @@
     "dev": "tsup --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "size-limit": "size-limit"
   },
   "keywords": [
     "globalization",
@@ -41,8 +42,7 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@zero-intl/core": "*",
-    "intl-messageformat": "^10.5.8"
+    "@zero-intl/core": "*"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.0",
@@ -55,6 +55,13 @@
     "react-dom": "^18.2.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^3.2.4"
-  }
+    "vitest": "^3.2.4",
+    "size-limit": "^11.2.0"
+  },
+  "size-limit": [
+    {
+      "path": "dist/index.mjs",
+      "limit": "20 KB"
+    }
+  ]
 }
