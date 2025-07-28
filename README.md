@@ -128,27 +128,10 @@ Extract translation keys from your source code:
 
 ```bash
 # Extract all translation keys
-zero-intl extract "src/**/*.{ts,tsx}" -o messages.json
-
-# Extract as CSV
-zero-intl extract "src/**/*.{ts,tsx}" -f csv -o messages.csv
-
-# Extract as simple key-value JSON
-zero-intl extract "src/**/*.{ts,tsx}" -f simple-json -o translations.json
-
-# Validate translation keys
-zero-intl validate "src/**/*.{ts,tsx}"
-
-# Extract from custom components
-zero-intl extract "src/**/*.{ts,tsx}" --additional-components "Translation,Translate"
+npx @zero-intl/cli extract "src/**/*.{ts,tsx}" --output messages.json
 ```
 
 ## 🔧 Development
-
-### Prerequisites
-
-- Node.js 18 or higher
-- npm 9 or higher
 
 ### Setup
 
@@ -198,17 +181,6 @@ The `@zero-intl/react` package provides:
 
 [Read the full React documentation →](./packages/react/README.md)
 
-### CLI Tool
-
-The `@zero-intl/cli` package provides:
-
-- **Message Extraction**: Extract translation keys from source code
-- **Validation**: Check for duplicate keys and missing default messages
-- **Multiple Formats**: Output as JSON, CSV, or simple key-value JSON
-- **Custom Components**: Support for custom translation components
-
-[Read the full CLI documentation →](./packages/cli/README.md)
-
 ## 🎯 Design Philosophy
 
 Zero Intl is designed with the following principles:
@@ -218,18 +190,6 @@ Zero Intl is designed with the following principles:
 3. **Customizable**: Provide flexible APIs for different use cases
 4. **Developer Experience**: Excellent tooling and TypeScript support
 5. **Performance**: Minimal runtime overhead and optimal bundle size
-
-## 🆚 Comparison with FormatJS
-
-| Feature          | Zero Intl                      | FormatJS                       |
-|------------------|--------------------------------|--------------------------------|
-| Bundle Size      | Smaller (modern browsers only) | Larger (broader compatibility) |
-| Tree Shaking     | Excellent                      | Good                           |
-| Custom Rendering | Built-in onRender support      | Requires custom components     |
-| CLI Tools        | Dedicated package              | Separate installation          |
-| ICU Support      | Native browser APIs            | Polyfilled                     |
-| Browser Support  | Modern browsers (ES2020+)      | Broader compatibility          |
-| TypeScript       | Full support                   | Full support                   |
 
 ## 📋 API Reference
 
@@ -256,35 +216,9 @@ interface TProps {
 }
 ```
 
-### useIntl Hook
-
-```typescript
-interface IntlShape {
-  locale: string;
-  formatMessage: (descriptor: MessageDescriptor) => string;
-  onRender?: (record: TranslationRecord) => React.ReactNode;
-}
-```
-
-## 🧪 Testing
-
-The project includes comprehensive test suites for both packages:
-
-```bash
-# Run all tests
-npm test
-
-# Run tests with coverage
-npm run test:ci
-
-# Run specific package tests
-npm run test -w @zero-intl/react
-npm run test -w @zero-intl/cli
-```
-
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions!
 
 ### Development Workflow
 
