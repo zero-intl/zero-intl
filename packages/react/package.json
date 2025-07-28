@@ -1,6 +1,6 @@
 {
   "name": "@zero-intl/react",
-  "version": "0.0.13",
+  "version": "0.0.20",
   "description": "Zero Intl Library for i18n",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",

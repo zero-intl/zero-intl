@@ -1,6 +1,6 @@
 {
   "name": "@zero-intl/cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CLI for extracting translation keys from zero-intl components",
   "type": "module",
   "bin": {

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
-import { ZeroIntlProvider, useIntl } from '../src/context'
-import { T } from '../src/T'
+import { ZeroIntlProvider, useIntl } from "../src"
+import { T } from "../src"
 
 // Test component that uses useIntl hook
 function TestComponent() {
@@ -507,6 +507,35 @@ describe('T component with React components in values', () => {
     expect(iconElement).toBeInTheDocument();
     expect(iconElement).toHaveClass('icon');
     expect(iconElement).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('should links components properly', () => {
+    const messages = {
+      'sample': 'Click <a>here</a> to continue'
+    };
+
+    render(
+      <ZeroIntlProvider locale="en" messages={messages}>
+        <T
+          id="sample"
+          values={{
+            a: (chunk: React.ReactNode) => (
+              <a href="https://example.com">
+                {chunk}
+              </a>
+            )
+          }}
+        />
+      </ZeroIntlProvider>
+    );
+
+    expect(screen.getByText(/Click/)).toBeInTheDocument();
+    expect(screen.getByText(/to continue/)).toBeInTheDocument();
+
+    const aElement = screen.getByRole('link');
+    expect(aElement).toBeInTheDocument();
+    expect(aElement).toHaveTextContent('here');
+    expect(aElement).toHaveAttribute('href', 'https://example.com');
   });
 
   it('should use defaultMessage when message is not found in messages object', () => {

@@ -12,26 +12,41 @@ export function T({ id, defaultMessage, values, children }: TProps) {
     typeof value === 'function' || React.isValidElement(value)
   );
 
+  // Check if the message contains XML-like tags (e.g., <a>)
+  const message = intl.messages[id] || defaultMessage || id;
+  const containsXmlTags = /<([a-zA-Z0-9_]+)>.*?<\/[a-zA-Z0-9_]+>/.test(message);
+
   let formattedMessage: React.ReactNode;
 
-  if (hasRichTextValues) {
-    // Use rich text formatting for React components
-    const message = intl.messages[id] || defaultMessage || id;
-
+  if (hasRichTextValues || containsXmlTags) {
+    // Use rich text formatting for React components or if message contains tags
     // Convert JSX elements to component functions for consistency
     const components: Record<string, (chunks: React.ReactNode) => React.ReactNode> = {};
-    const allValues: Record<string, any> = { ...values }; // Keep all values including JSX elements
+    const allValues: Record<string, any> = { ...values };
 
     if (values) {
       Object.entries(values).forEach(([key, value]) => {
         if (typeof value === 'function') {
           components[key] = value;
         } else if (React.isValidElement(value)) {
+          // If the value is a React element, treat it as a function returning the element
           components[key] = () => value;
         }
-        // Keep the original value in allValues for variable substitution
       });
     }
+
+    // If a tag is present in the message but not in values, provide a fallback that renders its children as plain text
+    const tagRegex = /<([a-zA-Z0-9_]+)>.*?<\/[a-zA-Z0-9_]+>/g;
+    let match;
+    const tagNames = new Set<string>();
+    while ((match = tagRegex.exec(message)) !== null) {
+      tagNames.add(match[1]);
+    }
+    tagNames.forEach(tag => {
+      if (!components[tag]) {
+        components[tag] = (chunks: React.ReactNode) => <React.Fragment>{chunks}</React.Fragment>;
+      }
+    });
 
     formattedMessage = formatRichTextMessage(message, intl.locale, allValues, components);
   } else {
