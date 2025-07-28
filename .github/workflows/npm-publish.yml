@@ -31,6 +31,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: 'npm'
       - run: npm ci
+      - run: npm run build:core
       - run: npm run build:react
       - run: npm publish --workspace @zero-intl/react --access public
         env:
