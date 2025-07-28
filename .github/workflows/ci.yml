@@ -1,4 +1,4 @@
-name: CI
+name: Test and Build Packages
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Test and Build Packages
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +36,7 @@ jobs:
       run: npm run test
 
   build-and-test-cli:
+    name: Build and Test CLI
     runs-on: ubuntu-latest
     needs: test
 
