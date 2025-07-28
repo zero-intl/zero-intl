@@ -31,7 +31,7 @@
     "extract",
     "zero-intl"
   ],
-  "author": "Zero Intl Team",
+  "author": "Jakub Pomykała",
   "license": "MIT",
   "dependencies": {
     "@typescript-eslint/parser": "^6.21.0",

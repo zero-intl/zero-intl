@@ -35,7 +35,7 @@
     "translate",
     "translation"
   ],
-  "author": "Sebastian Podsiadło",
+  "author": "Jakub Pomykała",
   "license": "MIT",
   "peerDependencies": {
     "react": ">=16.8.0",

@@ -31,7 +31,7 @@
     "formatjs",
     "icu"
   ],
-  "author": "Sebastian Podsiadło",
+  "author": "Jakub Pomykała",
   "license": "MIT",
   "dependencies": {
     "intl-messageformat": "^10.5.8"
