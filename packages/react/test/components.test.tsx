@@ -116,18 +116,28 @@ describe('ZeroIntlProvider', () => {
 })
 
 describe('useIntl', () => {
-  it('should throw error when used outside provider', () => {
+  it('should return fallback intl and log warning when used outside provider', () => {
+    let intlObject: any
+
     function ComponentWithoutProvider() {
-      useIntl()
-      return null
+      intlObject = useIntl()
+      return <div>{intlObject.formatMessage({ id: 'test.key' })}</div>
     }
 
-    // Suppress console.error for this test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    // Spy on console.warn
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    expect(() => {
-      render(<ComponentWithoutProvider />)
-    }).toThrow('useIntl must be used within a ZeroIntlProvider')
+    const { container } = render(<ComponentWithoutProvider />)
+
+    // Should warn about missing provider
+    expect(consoleSpy).toHaveBeenCalledWith('[zero-intl] useIntl must be used within a ZeroIntlProvider. Using fallback.')
+
+    // Should return fallback intl shape
+    expect(intlObject.locale).toBe('en')
+    expect(intlObject.messages).toEqual({})
+
+    // Should render the translation key as fallback
+    expect(container.textContent).toBe('test.key')
 
     consoleSpy.mockRestore()
   })

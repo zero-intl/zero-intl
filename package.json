@@ -6,13 +6,19 @@
   "workspaces": [
     "packages/core",
     "packages/react",
-    "packages/cli"
+    "packages/cli",
+    "examples/react-app"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "build:react": "npm run build -w @zero-intl/react",
     "build:cli": "npm run build -w @zero-intl/cli",
     "build:core": "npm run build -w @zero-intl/core",
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:react": "npm run dev -w @zero-intl/react",
+    "dev:core": "npm run dev -w @zero-intl/core",
+    "example": "npm run build:core && npm run build:react && npm run dev -w react-app-example",
+    "yalc:publish": "npm run build && cd packages/core && yalc publish --push && cd ../react && yalc publish --push",
     "test": "npm run test --workspaces --if-present",
     "test:react": "npm run test -w @zero-intl/react",
     "test:cli": "npm run test -w @zero-intl/cli",

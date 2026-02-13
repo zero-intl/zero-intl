@@ -24,11 +24,27 @@ export function ZeroIntlProvider({
   );
 }
 
+// Default fallback intl shape when no provider is present
+const createFallbackIntl = (): IntlShape => ({
+  locale: 'en',
+  messages: {},
+  defaultLocale: 'en',
+  defaultMessages: {},
+  formatMessage: (descriptor) => {
+    console.warn(`[zero-intl] Missing ZeroIntlProvider. Rendering key: "${descriptor.id}"`);
+    return descriptor.id;
+  },
+  onError: undefined,
+  onRender: undefined,
+  defaultRichComponents: undefined,
+});
+
 export function useIntl(): IntlShape {
   const context = useContext(IntlContext);
 
   if (!context) {
-    throw new Error('useIntl must be used within a ZeroIntlProvider');
+    console.warn('[zero-intl] useIntl must be used within a ZeroIntlProvider. Using fallback.');
+    return createFallbackIntl();
   }
 
   return context;

@@ -28,8 +28,11 @@ export function createIntl(
   return {
     locale,
     messages,
+    defaultLocale,
+    defaultMessages,
     formatMessage: (descriptor: MessageDescriptor) =>
       formatMessage(messages, descriptor, locale, defaultLocale, defaultMessages, onError),
+    onError,
     onRender,
     defaultRichComponents
   };

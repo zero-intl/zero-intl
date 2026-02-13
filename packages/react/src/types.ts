@@ -47,7 +47,10 @@ export interface TranslationRecord {
 export interface IntlShape {
   locale: string;
   messages: Record<string, string>;
+  defaultLocale?: string;
+  defaultMessages?: Record<string, string>;
   formatMessage: (descriptor: MessageDescriptor) => string;
+  onError?: (error: string) => void;
   onRender?: (record: TranslationRecord) => ReactNode;
   defaultRichComponents?: RichTextComponents;
 }
