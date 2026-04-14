@@ -9,7 +9,3 @@ export {
   interpolateMessage,
   formatMessage
 } from "./formatter";
-
-export {
-  formatRichTextMessage
-} from "./formatterRich";

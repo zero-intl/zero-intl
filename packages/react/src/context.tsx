@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { IntlShape, ZeroIntlProviderProps, TranslationFunction, NamespacedTranslationFunction } from './types';
 import { createIntl } from './utils';
 import { formatRichTextMessage } from './richTextFormatter';
@@ -14,8 +14,11 @@ export function ZeroIntlProvider({
   onRender,
   defaultRichComponents,
   children,
-}: ZeroIntlProviderProps) {
-  const intl = createIntl(locale, messages, defaultLocale, defaultMessages, onError, onRender, defaultRichComponents);
+}: Readonly<ZeroIntlProviderProps>) {
+  const intl = useMemo(
+    () => createIntl(locale, messages, defaultLocale, defaultMessages, onError, onRender, defaultRichComponents),
+    [locale, messages, defaultLocale, defaultMessages, onError, onRender, defaultRichComponents]
+  );
 
   return (
     <IntlContext.Provider value={intl}>
@@ -55,7 +58,7 @@ export function useTranslations(namespace: string): NamespacedTranslationFunctio
 export function useTranslations(namespace?: string): TranslationFunction | NamespacedTranslationFunction {
   const intl = useIntl();
 
-  function createTranslationFunction(ns?: string) {
+  return useMemo(() => {
     function t(id: string, options?: { defaultMessage?: string } & Record<string, any>): string {
       let defaultMessage: string | undefined;
       let values: Record<string, any> | undefined;
@@ -68,7 +71,7 @@ export function useTranslations(namespace?: string): TranslationFunction | Names
       }
 
       // Add namespace prefix if provided
-      const fullId = ns ? `${ns}.${id}` : id;
+      const fullId = namespace ? `${namespace}.${id}` : id;
 
       return intl.formatMessage({
         id: fullId,
@@ -80,8 +83,11 @@ export function useTranslations(namespace?: string): TranslationFunction | Names
     // Add format method for Rich Text
     t.format = function(id: string, defaultMessage?: string, components?: Record<string, (chunks: React.ReactNode) => React.ReactNode>, values?: Record<string, any>) {
       // Add namespace prefix if provided
-      const fullId = ns ? `${ns}.${id}` : id;
-      const message = intl.messages[fullId] || defaultMessage || fullId;
+      const fullId = namespace ? `${namespace}.${id}` : id;
+      const message = intl.messages[fullId]
+        || (intl.defaultMessages?.[fullId])
+        || defaultMessage
+        || fullId;
 
       // Merge default rich components with provided components
       // Provided components take precedence over default ones
@@ -90,11 +96,9 @@ export function useTranslations(namespace?: string): TranslationFunction | Names
         ...components
       };
 
-      return formatRichTextMessage(message, intl.locale, values, mergedComponents);
+      return formatRichTextMessage(message, values, mergedComponents);
     };
 
     return t;
-  }
-
-  return createTranslationFunction(namespace);
+  }, [intl, namespace]);
 }

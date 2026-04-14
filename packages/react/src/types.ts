@@ -18,11 +18,8 @@ export interface TranslationFunction {
   format: (id: string, defaultMessage?: string, components?: RichTextComponents, values?: Record<string, any>) => ReactNode;
 }
 
-export interface NamespacedTranslationFunction {
-  (id: string): string;
-  (id: string, options: { defaultMessage?: string } & Record<string, any>): string;
-  format: (id: string, defaultMessage?: string, components?: RichTextComponents, values?: Record<string, any>) => ReactNode;
-}
+// Alias for backward compatibility — functionally identical to TranslationFunction
+export type NamespacedTranslationFunction = TranslationFunction;
 
 export interface Message {
   id: string;

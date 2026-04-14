@@ -6,7 +6,6 @@ import { RichTextComponents } from "./types";
  */
 export function formatRichTextMessage(
   message: string,
-  locale: string,
   values?: Record<string, any>,
   components?: RichTextComponents
 ): ReactNode {

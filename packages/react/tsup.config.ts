@@ -17,13 +17,11 @@ export default defineConfig([
       "react-dom",
       "esbuild",
       "vitest",
-      "esbuild",
       "@vitest/*",
       "@vitejs/*",
       "@testing-library/*",
       "jsdom",
       "@zero-intl/core",
-      "intl-messageformat",
     ],
     target: "es2022",
     outDir: "dist"

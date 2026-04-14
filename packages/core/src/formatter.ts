@@ -91,7 +91,7 @@ function parseICUAtPosition(
   }
 
   // Skip whitespace and comma
-  while (i < message.length && /\s,/.test(message[i])) i++;
+  while (i < message.length && /[\s,]/.test(message[i])) i++;
 
   // Parse rules until closing brace
   const { rules, endIndex } = parseICURulesAtPosition(message, i);

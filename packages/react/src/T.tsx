@@ -12,8 +12,13 @@ export function T({ id, defaultMessage, values, children }: TProps) {
       typeof value === "function" || React.isValidElement(value)
     );
 
+    // Resolve message with full fallback chain: messages → defaultMessages → defaultMessage → id
+    const message = intl.messages[id]
+      || (intl.defaultMessages && intl.defaultMessages[id])
+      || defaultMessage
+      || id;
+
     // Check if the message contains XML-like tags (e.g., <a>)
-    const message = intl.messages[id] || defaultMessage || id;
     const containsXmlTags = /<([a-zA-Z0-9_]+)>.*?<\/[a-zA-Z0-9_]+>/.test(message);
 
     if (hasRichTextValues || containsXmlTags) {
@@ -21,6 +26,11 @@ export function T({ id, defaultMessage, values, children }: TProps) {
       // Convert JSX elements to component functions for consistency
       const components: Record<string, (chunks: React.ReactNode) => React.ReactNode> = {};
       const allValues: Record<string, any> = { ...values };
+
+      // Start with defaultRichComponents from provider
+      if (intl.defaultRichComponents) {
+        Object.assign(components, intl.defaultRichComponents);
+      }
 
       if (values) {
         Object.entries(values).forEach(([key, value]) => {
@@ -46,12 +56,12 @@ export function T({ id, defaultMessage, values, children }: TProps) {
         }
       });
 
-      return formatRichTextMessage(message, intl.locale, allValues, components);
+      return formatRichTextMessage(message, allValues, components);
     } else {
       // Use regular string formatting
       return intl.formatMessage({ id, defaultMessage, values });
     }
-  }, [id, defaultMessage, values, intl.messages, intl.locale, intl.formatMessage]);
+  }, [id, defaultMessage, values, intl.messages, intl.defaultMessages, intl.locale, intl.formatMessage, intl.defaultRichComponents]);
 
   // Handle children render prop
   let result: React.ReactNode = formattedMessage;
