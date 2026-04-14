@@ -165,10 +165,10 @@ export class MessageExtractor {
         if (ts.isPropertyAssignment(property) && ts.isIdentifier(property.name)) {
           const propertyName = property.name.text;
 
-          if (propertyName === 'defaultMessage' && ts.isStringLiteral(property.initializer)) {
-            defaultMessage = property.initializer.text;
-          } else if (propertyName === 'description' && ts.isStringLiteral(property.initializer)) {
-            description = property.initializer.text;
+          if (propertyName === 'defaultMessage') {
+            defaultMessage = this.getStringValue(property.initializer);
+          } else if (propertyName === 'description') {
+            description = this.getStringValue(property.initializer);
           }
         }
       }
@@ -198,5 +198,22 @@ export class MessageExtractor {
     }
 
     return false;
+  }
+
+  /**
+   * Extract a string value from a node. Handles:
+   * - StringLiteral: 'hello' or "hello"
+   * - NoSubstitutionTemplateLiteral: `hello` (backtick without interpolation)
+   * - TemplateExpression with interpolation: `hello ${name}` — returns undefined (not statically extractable)
+   */
+  private getStringValue(node: ts.Node): string | undefined {
+    if (ts.isStringLiteral(node)) {
+      return node.text;
+    }
+    if (ts.isNoSubstitutionTemplateLiteral(node)) {
+      return node.text;
+    }
+    // TemplateExpression with ${...} — can't be statically extracted
+    return undefined;
   }
 }

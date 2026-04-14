@@ -664,4 +664,99 @@ function Component() {
       file: testFile
     });
   });
+
+  it('should extract t function calls with extra values like provider alongside defaultMessage', () => {
+    const testFile = join(testDir, 't-function-with-extra-values.tsx');
+    const content = `
+import React from 'react';
+import { useTranslations } from '@zero-intl/react';
+
+function Component() {
+  const t = useTranslations();
+  const formattedProviderName = "Google";
+  
+  return (
+    <div>
+      <p>{t("profile.changeEmailError.title", { defaultMessage: "Change email" })}</p>
+      <p>{t("profile.changeEmailError.message", { provider: formattedProviderName, defaultMessage: "There is no option to change email for {provider} accounts." })}</p>
+    </div>
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(2);
+    expect(messages[0]).toMatchObject({
+      id: 'profile.changeEmailError.title',
+      defaultMessage: 'Change email',
+      file: testFile
+    });
+    expect(messages[1]).toMatchObject({
+      id: 'profile.changeEmailError.message',
+      defaultMessage: 'There is no option to change email for {provider} accounts.',
+      file: testFile
+    });
+  });
+
+  it('should extract t function calls with template literal defaultMessage (no substitution)', () => {
+    const testFile = join(testDir, 't-function-template-literal.tsx');
+    const content = `
+import React from 'react';
+import { useTranslations } from '@zero-intl/react';
+
+function Component() {
+  const t = useTranslations();
+  
+  return (
+    <div>
+      <p>{t("some.key", { defaultMessage: \`Simple template literal\` })}</p>
+    </div>
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'some.key',
+      defaultMessage: 'Simple template literal',
+      file: testFile
+    });
+  });
+
+  it('should extract id but skip defaultMessage for template literals with interpolation', () => {
+    const testFile = join(testDir, 't-function-template-with-interpolation.tsx');
+    const content = `
+import React from 'react';
+import { useTranslations } from '@zero-intl/react';
+
+function Component() {
+  const t = useTranslations();
+  const formattedProviderName = "Google";
+  
+  return (
+    <div>
+      <p>{t("profile.changeEmailError.message", { provider: formattedProviderName, defaultMessage: \`There is no option to change email address for accounts created with \${formattedProviderName} provider.\` })}</p>
+    </div>
+  );
+}
+`;
+    writeFileSync(testFile, content);
+
+    const extractor = new MessageExtractor();
+    const messages = extractor.extractFromFile(testFile);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      id: 'profile.changeEmailError.message',
+      file: testFile
+    });
+    // Template literal with interpolation can't be statically extracted
+  });
 });
