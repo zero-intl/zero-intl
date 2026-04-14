@@ -18,6 +18,7 @@ This monorepo contains two main packages:
 
 | Package                                | Description                                             | Version                                               |
 |----------------------------------------|---------------------------------------------------------|-------------------------------------------------------|
+| [`@zero-intl/core`](./packages/core)     | Core library | ![npm](https://img.shields.io/npm/v/@zero-intl/core)   |
 | [`@zero-intl/react`](./packages/react) | React components and hooks for internationalization     | ![npm](https://img.shields.io/npm/v/@zero-intl/react) |
 | [`@zero-intl/cli`](./packages/cli)     | CLI tool for extracting and validating translation keys | ![npm](https://img.shields.io/npm/v/@zero-intl/cli)   |
 
